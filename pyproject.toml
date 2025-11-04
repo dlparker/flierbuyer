@@ -1,0 +1,28 @@
+[project]
+name = "flierbuyer"
+version = "0.1.0"
+description = "Market research for purchase of a fast sailboat"
+readme = "README.md"
+authors = [
+    { name = "Dennis Parker", email = "dennis@windhavengroup.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.14.2",
+    "fuzzywuzzy>=0.18.0",
+    "pandas>=2.3.3",
+]
+
+#[project.scripts]
+#filerbuyer = ":main"
+
+[build-system]
+requires = ["uv_build>=0.8.14,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipdb>=0.13.13",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+]
