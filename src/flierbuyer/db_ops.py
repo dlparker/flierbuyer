@@ -1,49 +1,39 @@
+# src/flierbuyer/db_ops.py
 import sqlite3
-import json
-from datetime import date
-from fuzzywuzzy import fuzz
+from pathlib import Path
 
-def setup_db():
-    conn = sqlite3.connect('corsair_market.db')
-    c = conn.cursor()
-    c.execute('''
+DB_PATH = Path(__file__).parents[2] / "corsair_market.db"
+
+def get_conn() -> sqlite3.Connection:
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_schema() -> None:
+    conn = get_conn()
+    conn.execute(
+        """
         CREATE TABLE IF NOT EXISTS listings (
             boat_id TEXT PRIMARY KEY,
             url TEXT UNIQUE,
-            model TEXT,
+            model TEXT NOT NULL,
             year INTEGER,
             location TEXT,
             price REAL,
-            trailer BOOLEAN,
-            has_head BOOLEAN,
-            extended_tongue BOOLEAN,
-            features TEXT,	-- JSON string
-            notes TEXT,
-            first_seen DATE,
-            last_updated DATE,
+            trailer TEXT,
+            has_head TEXT,
+            extended_tongue TEXT,
+            features TEXT, -- JSON string
+            special TEXT,
+            first_seen DATE NOT NULL,
+            last_updated DATE NOT NULL,
             source_site TEXT,
             status TEXT DEFAULT 'Active'
         )
-    ''')
+        """
+    )
     conn.commit()
     conn.close()
 
 
-def add_or_update(conn, new_entry):
-    c = conn.cursor()
-    c.execute("SELECT * FROM listings WHERE url = ?", (new_entry['url'],))
-    existing = c.fetchone()
-    if existing:
-        # Update price, features merge
-        new_features = json.loads(existing[9])  # features col
-        new_features.update(json.loads(new_entry['features']))
-        c.execute("UPDATE listings SET price=?, features=?, last_updated=? WHERE url=?",
-                  (new_entry['price'], json.dumps(new_features), date.today(), new_entry['url']))
-        print(f"Updated {new_entry['url']}: Price now ${new_entry['price']}")
-    else:
-        # Insert new
-        c.execute("INSERT INTO listings VALUES (?,?,?,?,?,?,?,?,?,?,?, ?,?,?)", 
-                  (new_entry['boat_id'], new_entry['url'], ...))  # Map fields
-        print(f"New: {new_entry['model']} {new_entry['year']} in {new_entry['location']}")
-    conn.commit()
-    
+
